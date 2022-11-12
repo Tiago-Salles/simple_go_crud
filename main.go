@@ -10,8 +10,6 @@ import (
 	"github.com/go-sql-driver/mysql"
 )
 var db *sql.DB
-
-
 type User struct {
 	Id int
 	Name string
@@ -42,15 +40,15 @@ func connectToDb(){
 	fmt.Println("------ CONNECTED TO DB ------")
 }
 
-// func insertToDb(user User){
-// 	result, err := db.Exec("INSERT INTO users (id, name, age, country, city) VALUES (?, ?, ?, ?, ?)", user.Id, user.Name, user.Age, user.Country, user.City)
-// 	if err != nil{
-// 		panic(err)
-// 	}else {
-// 		fmt.Println(result)
-// 		fmt.Println("INSERTED user " + user.Name)
-// 	}
-// }
+func insertToDb(user User){
+	result, err := db.Exec("INSERT INTO users (id, name, age, country, city) VALUES (?, ?, ?, ?, ?)", user.Id, user.Name, user.Age, user.Country, user.City)
+	if err != nil{
+		panic(err)
+	}else {
+		fmt.Println(result)
+		fmt.Println("INSERTED user " + user.Name)
+	}
+}
 
 func getAllUsersFromDb()[]User{
 	var users []User
@@ -91,8 +89,6 @@ func getUserById(context *gin.Context){
 	id := context.Param("id")
 	context.IndentedJSON(http.StatusOK, getUserFromDbById(id))
 }
-
-
 
 func main(){
 	connectToDb()
