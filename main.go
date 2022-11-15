@@ -40,14 +40,24 @@ func connectToDb(){
 	fmt.Println("------ CONNECTED TO DB ------")
 }
 
-func insertToDb(user User){
+func insertUserOnDb(user User)int{
 	result, err := db.Exec("INSERT INTO users (id, name, age, country, city) VALUES (?, ?, ?, ?, ?)", user.Id, user.Name, user.Age, user.Country, user.City)
 	if err != nil{
 		panic(err)
 	}else {
 		fmt.Println(result)
 		fmt.Println("INSERTED user " + user.Name)
+		return user.Id
 	}
+}
+
+func saveUser(context *gin.Context){
+	var user User
+	err := context.BindJSON(&user)
+	if err != nil {
+		context.IndentedJSON(http.StatusBadRequest, 400)
+	}
+	context.IndentedJSON(http.StatusOK, insertUserOnDb(user))
 }
 
 func getAllUsersFromDb()[]User{
@@ -90,10 +100,27 @@ func getUserById(context *gin.Context){
 	context.IndentedJSON(http.StatusOK, getUserFromDbById(id))
 }
 
+
+func deleteUserFromDB(id string)sql.Result{
+	result, err := db.Exec("DELETE FROM users WHERE id = ?", id)
+	if err != nil{
+		panic(err.Error())
+	}
+	return result
+}	
+
+func deleteUser(context *gin.Context){
+	id := context.Param("id")
+	deleteUserFromDB(id)
+	context.IndentedJSON(http.StatusOK, 200)
+}
+
 func main(){
 	connectToDb()
 	router := gin.Default()
 	router.GET("/users", getAllUsers)
 	router.GET("/users/:id", getUserById)
+	router.POST("/users/register", saveUser)
+	router.DELETE("/users/delete/:id", deleteUser)
 	router.Run("localhost:8080")
 }
